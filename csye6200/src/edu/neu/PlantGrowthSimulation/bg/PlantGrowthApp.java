@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import javax.swing.JTextArea;
 
-import edu.neu.csye6200.ui.BGApp;
+import edu.neu.PlantGrowthSimulation.ui.BGApp;
 
 public class PlantGrowthApp extends BGApp {
 
