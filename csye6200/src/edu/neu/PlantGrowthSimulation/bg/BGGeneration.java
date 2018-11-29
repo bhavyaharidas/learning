@@ -18,9 +18,10 @@ public class BGGeneration extends Thread {
 	private int specimenId;
 	private double totalLength = 0;
 	private double totalWidth = 0;
-	private BGStem firstGen = new BGStem();
+	private static BGStem firstGen = new BGStem();
 	private ArrayList<BGStem> stemFamily;
 	private BGRule rule;
+	private BGGenerationSet generationSet; 
 
 	public BGGeneration(String name) {
 		super(name);
@@ -29,6 +30,10 @@ public class BGGeneration extends Thread {
 		specimenId = idCount;
 		rule = new BGRule();
 		this.stemFamily = new ArrayList<BGStem>();
+	}
+
+	public static BGStem getFirstGen() {
+		return firstGen;
 	}
 
 	public void setDone(boolean done) {
@@ -48,10 +53,12 @@ public class BGGeneration extends Thread {
 	}
 
 	public void run() {
+		generationSet = new BGGenerationSet();
 		while (!done) {
 			grow();
 			calculateDimensions();
 			printGeneration();
+			generationSet.addGeneration(this);
 			try {
 				Thread.sleep(5000L);
 			} catch (InterruptedException e) {

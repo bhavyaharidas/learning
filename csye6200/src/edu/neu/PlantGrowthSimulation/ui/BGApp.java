@@ -1,104 +1,85 @@
 package edu.neu.PlantGrowthSimulation.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowListener;
 
-import edu.neu.csye6200.bg.CustomOutputStream;
+/**
+ * A sample Biological Growth Abstract application class
+ * @author MMUNSON
+ *
+ */
+public abstract class BGApp implements ActionListener, WindowListener {
+	protected JFrame frame = null;
+	protected MenuManager menuMgr = null;
 
-public abstract class BGApp implements ActionListener {
-
-	private JFrame frame = null; // Window
-	private JPanel mainPanel = null; // Panel - Drawable Region
-	private JButton startBtn = null;
-	private JButton stopBtn = null;
-	protected JTextField textfield = null;
-	private JLabel label = null;
-	private JScrollPane scrollPane;
-	JTextArea textArea = new JTextArea();
-
-	public BGApp(JTextArea textArea) {
+	/**
+	 * The Biological growth constructor
+	 */
+	public BGApp() {
 		initGUI();
-		this.textArea = textArea;
 	}
+	
+	/**
+	 * Initialize the Graphical User Interface
+	 */
+    public void initGUI() {
+    	frame = new JFrame();
+		frame.setTitle("BGApp");
 
-	private void initGUI() {
-		frame = new JFrame();
-		frame.setTitle("BGAppUI");
-		frame.setSize(400, 300); // Set the size to something reasonable
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // If we press close button, exit
-		frame.setVisible(true);
-
+		frame.setResizable(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //JFrame.DISPOSE_ON_CLOSE)
+		
+		// Permit the app to hear about the window opening
+		frame.addWindowListener(this); 
+		
+		menuMgr = new MenuManager(this);
+		
+		frame.setJMenuBar(menuMgr.getMenuBar()); // Add a menu bar to this application
+		
 		frame.setLayout(new BorderLayout());
-		// frame.setLayeredPane(new BorderLayout());
-
 		frame.add(getMainPanel(), BorderLayout.CENTER);
-		scrollPane = new JScrollPane(mainPanel);
-		//frame.add(scrollPane);
-		
-		
-		BGPanel panel = new BGPanel();
-		frame.add(panel);
-	}
+    }
+    
+    /**
+     * Override this method to provide the main content panel.
+     * @return a JPanel, which contains the main content of of your application
+     */
+    public abstract JPanel getMainPanel() ;
 
-	// Returns a JPanel - a drawable region, that we'll draw into
-	public JPanel getMainPanel() {
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new FlowLayout());
-		
-		startBtn = new JButton("Start");
-		stopBtn = new JButton("Stop");
-		
-		textfield = new JTextField(); textfield.setColumns(10);
-		textfield.setHorizontalAlignment(textfield.LEFT);
-		 
-		/*JTextArea textArea = new JTextArea(50, 10);
-		PrintStream printStream = new PrintStream(new CustomOutputStream(textArea));
-		System.setOut(printStream);
-		System.setErr(printStream);*/
-		
-		label = new JLabel("Enter name of plant: ");
-		label.setForeground(Color.white);
-		
-		startBtn.addActionListener(this);
-		stopBtn.addActionListener(this);
-		mainPanel.add(label);
-		mainPanel.add(textfield);
-		mainPanel.add(startBtn);
-		mainPanel.add(stopBtn);
-		mainPanel.add(textArea);
-		mainPanel.setBackground(Color.black);
-		return mainPanel;
-	}
+    
+    /**
+     * A convenience method that uses the Swing dispatch threat to show the UI.
+     * This prevents concurrency problems during component initialization.
+     */
+    public void showUI() {
+    	
+        SwingUtilities.invokeLater(new Runnable() {
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == "Start")
-			startAction();
-		else if (e.getActionCommand() == "Stop")
-			stopAction();
-	}
+            @Override
+            public void run() {
+            	frame.setVisible(true); // The UI is built, so display it;
+            }
+        });
+    	
+    }
+    
+    /**
+     * Shut down the application
+     */
+    public void exit() {
+    	frame.dispose();
+    	System.exit(0);
+    }
 
-	public void startAction() {
-	}
-
-	public void stopAction() {
-	}
-
+    /**
+     * Override this method to show a About Dialog
+     */
+    public void showHelp() {
+    }
+	
 }
