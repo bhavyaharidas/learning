@@ -61,6 +61,9 @@ public class BGGenerationSet extends Observable implements Runnable {
 					e.printStackTrace();
 				}
 			}
+			if(done) {
+				addGeneration(new BGGeneration("", rule));
+			}
 		}
 
 	}

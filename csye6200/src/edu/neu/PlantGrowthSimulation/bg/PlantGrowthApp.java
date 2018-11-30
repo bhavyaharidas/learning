@@ -195,9 +195,10 @@ public class PlantGrowthApp extends BGApp {
 		resetBtn = new JButton("Reset"); // Allow the app to hear about button pushes
 		resetBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				generations.setDone(true);
 				growThread.stop();
-				bgPanel.setReset(true);
-				bgPanel.repaint();
+				//bgPanel.setReset(true);
+				//bgPanel.repaint();
 			}
 		});
 

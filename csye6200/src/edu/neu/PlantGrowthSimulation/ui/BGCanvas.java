@@ -89,6 +89,10 @@ public class BGCanvas extends JPanel implements Observer {
 		if (baseStem != null && !reset) {
 			paintLine(g2d, 10 * baseStem.getStartLoc()[0], referenceY - baseStem.getStartLoc()[1], 10 * baseStem.getStartLoc()[0], referenceY - (baseStem.getLength() * 10), Color.GREEN);
 			drawGeneration(baseStem,g2d);
+		} else if(reset) {
+			reset = false;
+			baseStem = null;
+			repaint();
 		}
 		/*
 		 * } }
