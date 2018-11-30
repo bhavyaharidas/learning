@@ -8,58 +8,61 @@ import edu.neu.PlantGrowthSimulation.ui.BGCanvas;
 
 public class BGGenerationSet extends Observable implements Runnable {
 
-	private ArrayList<BGGeneration> plants;
+	private BGRule rule;
+	private static ArrayList<BGGeneration> generations;
 	private BGCanvas observer = null;
+	private boolean done = false;
+	private boolean running = false;
+	private int[] startPoint;
 
-	public BGGenerationSet() {
-		plants = new ArrayList<BGGeneration>();
+	public BGGenerationSet(BGRule rule, int[] startPoint) {
+		this.rule = rule;
+		this.startPoint = startPoint;
+		generations = new ArrayList<BGGeneration>();
 		observer = BGCanvas.instance();
-		this.addObserver(observer);     // make a subscription
+		this.addObserver(observer); // make a subscription
 	}
 
-	
-	public ArrayList<BGGeneration> getPlants() {
-		return plants;
+	public ArrayList<BGGeneration> getGenerations() {
+		return generations;
 	}
 
 	public void addGeneration(BGGeneration generation) {
-		
-		plants.add(generation);
+
+		generations.add(generation);
 		setChanged(); // Indicate that a generation has been added
 		notifyObservers(generation);
 	}
 
-
-
-	public void createPlants() {
-		int i = 100;
-			BGGeneration plant = new BGGeneration("Name");
-			BGStem stem = new BGStem(new int[] { i, 0 }, 5, 90);
-			plant.setFirstGen(stem);
-			plant.addToStemFamily(stem);
-			plants.add(plant);
-			plant.start();
-			i += 100;
-	}
-
 	public void setDone(boolean done) {
-		for(BGGeneration plant : plants) {
-			plant.setDone(true);		
+		for (BGGeneration generation : generations) {
+			generation.setDone(true);
 		}
 	}
-	/*
-	 * public void growPlants() { if(plants != null) { for(BGGeneration plant :
-	 * plants) { plant.grow(); } } }
-	 * 
-	 * public void printPlants() { if(plants != null) { for(BGGeneration plant :
-	 * plants) { plant.printGeneration(); } }
-	 */
 
+	public void setRunning(boolean running) {
+		this.running = running;
+	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		if (generations.isEmpty()) {
+			BGGeneration generation = new BGGeneration("Name", rule);
+			BGStem stem = new BGStem(startPoint, 5, 90);
+			generation.setFirstGen(stem);
+			generation.addToStemFamily(stem);
+			while (!done) {
+				generation.grow();
+				// generation.printGeneration();
+				addGeneration(generation);
+				try {
+					Thread.sleep(3000L);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 	}
 
 }

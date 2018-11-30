@@ -1,22 +1,24 @@
 package edu.neu.PlantGrowthSimulation.bg;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BGRule {
 
+	private String name;
 	private HashMap<Double, Double[]> angleLookUp;
 
 	public HashMap<Double, Double[]> getAngleLookUp() {
 		return angleLookUp;
 	}
 
-	public BGRule() {
-		angleLookUp = new HashMap<Double, Double[]>();
-		angleLookUp.put(0.0, new Double[] { 45.0 });
-		angleLookUp.put(45.0, new Double[] { 0.0, 45.0, 90.0 });
-		angleLookUp.put(90.0, new Double[] { 45.0, 90.0, 135.0 });
-		angleLookUp.put(135.0, new Double[] { 90.0, 135.0, 180.0 });
-		angleLookUp.put(180.0, new Double[] { 135.0 });
+	public BGRule(String name, HashMap<Double, Double[]> angleLookUp) {
+		this.name = name;
+		this.angleLookUp = angleLookUp;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public int lengthLookup(double totalLength, double totalWidth) {
@@ -34,6 +36,13 @@ public class BGRule {
 
 	public boolean timeToFlower(int generation) {
 		return (generation % 2 == 0);
+	}
+	
+	private String printHeader() {
+		return String.format("%0" + 105 + "d", 0).replace("0", "-")
+				+ "\n" + String.format("%10s %2$13c %3$15s %4$13c %5$15s %6$13c %7$5s", "Stem Id", '|',
+						"Start Location", '|', "Direction", '|', "Length")
+				+ "\n" + String.format("%0" + 105 + "d", 0).replace("0", "*");
 	}
 
 }

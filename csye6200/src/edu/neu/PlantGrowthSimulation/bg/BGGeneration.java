@@ -9,7 +9,7 @@ import javax.swing.JTextArea;
 import edu.neu.csye6200.sim.Flower;
 import edu.neu.csye6200.sim.Stem;
 
-public class BGGeneration extends Thread {
+public class BGGeneration {
 
 	private boolean done = false;
 
@@ -21,14 +21,12 @@ public class BGGeneration extends Thread {
 	private static BGStem firstGen = new BGStem();
 	private ArrayList<BGStem> stemFamily;
 	private BGRule rule;
-	private BGGenerationSet generationSet; 
 
-	public BGGeneration(String name) {
-		super(name);
+	public BGGeneration(String name, BGRule rule) {
 		this.typeName = name;
 		idCount++;
 		specimenId = idCount;
-		rule = new BGRule();
+		this.rule = rule;
 		this.stemFamily = new ArrayList<BGStem>();
 	}
 
@@ -52,23 +50,9 @@ public class BGGeneration extends Thread {
 		this.stemFamily.add(stem);
 	}
 
-	public void run() {
-		generationSet = new BGGenerationSet();
-		while (!done) {
-			grow();
-			calculateDimensions();
-			printGeneration();
-			generationSet.addGeneration(this);
-			try {
-				Thread.sleep(5000L);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 	public void grow() {
 		growStem(firstGen);
+		calculateDimensions();
 	}
 
 	public void growStem(BGStem child) {
@@ -79,7 +63,6 @@ public class BGGeneration extends Thread {
 		} else {
 			createGeneration(child);
 		}
-
 	}
 
 	public void printGeneration() {
@@ -89,10 +72,10 @@ public class BGGeneration extends Thread {
 			System.out.println(stem.toString());
 		}
 	}
-	
+
 	public String toString() {
-		String p = "\n\nName - " + typeName + "\nSpecimen Id = " + specimenId + "\nLength - " + totalLength + "\nWidth - "
-				+ totalWidth + "\nTotal Stem count - " + stemFamily.size();
+		String p = "\n\nName - " + typeName + "\nSpecimen Id = " + specimenId + "\nLength - " + totalLength
+				+ "\nWidth - " + totalWidth + "\nTotal Stem count - " + stemFamily.size();
 
 		return p;
 	}
@@ -103,7 +86,7 @@ public class BGGeneration extends Thread {
 		int y = stem.getStartLoc()[1] + (int) (stem.getLength() * Math.sin(Math.toRadians(stem.getDirection())));
 		int[] newStartLoc = new int[] { x, y }; // New start location
 
-		int length = rule.lengthLookup(totalLength,totalWidth); // New length
+		int length = rule.lengthLookup(totalLength, totalWidth); // New length
 		Double[] angles = rule.getAngleLookUp().get(stem.getDirection()); // New set of angles
 
 		for (double angle : angles) {
@@ -119,7 +102,7 @@ public class BGGeneration extends Thread {
 						"Start Location", '|', "Direction", '|', "Length")
 				+ "\n" + String.format("%0" + 105 + "d", 0).replace("0", "*");
 	}
-	
+
 	private void calculateDimensions() {
 		ArrayList<Integer> xcoords = new ArrayList<Integer>(); // to store all open x end points
 		ArrayList<Integer> ycoords = new ArrayList<Integer>(); // to store all open y end points

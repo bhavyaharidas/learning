@@ -30,6 +30,7 @@ public class BGCanvas extends JPanel implements Observer {
 	private BGStem baseStem = null;
 	private int referenceX = 0;
 	private int referenceY = 600;
+	private boolean reset = false;
 
 	private static BGCanvas instance = null; // The single copy
 
@@ -85,13 +86,17 @@ public class BGCanvas extends JPanel implements Observer {
 		int endx = size.width;
 		int endy = 600;
 		paintLine(g2d, startx, starty, endx, endy, Color.GREEN);
-		if (baseStem != null) {
+		if (baseStem != null && !reset) {
 			paintLine(g2d, 10 * baseStem.getStartLoc()[0], referenceY - baseStem.getStartLoc()[1], 10 * baseStem.getStartLoc()[0], referenceY - (baseStem.getLength() * 10), Color.GREEN);
 			drawGeneration(baseStem,g2d);
 		}
 		/*
 		 * } }
 		 */
+	}
+
+	public void setReset(boolean reset) {
+		this.reset = reset;
 	}
 
 	private void drawGeneration(BGStem stem, Graphics2D g2d) {
@@ -134,7 +139,7 @@ public class BGCanvas extends JPanel implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object generation) {
-		BGGeneration gen = new BGGeneration("Name");
+		BGGeneration gen;
 		gen = (BGGeneration) generation;
 		baseStem = gen.getFirstGen();
 		this.revalidate();

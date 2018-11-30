@@ -9,23 +9,33 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import edu.neu.PlantGrowthSimulation.ui.BGApp;
 import edu.neu.PlantGrowthSimulation.ui.BGCanvas;
+import edu.neu.PlantGrowthSimulation.ui.BGRuleView;
+import edu.neu.PlantGrowthSimulation.ui.MenuManager;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
 public class PlantGrowthApp extends BGApp {
-	
+
 	private static Logger log = Logger.getLogger(PlantGrowthApp.class.getName());
 	private static int MAX_GENERATIONS = 15;
-	
+
+	private BGGenerationSet generations;
+	private BGRule defaultRule;
+	private ArrayList<BGRule> rules;
+	private Thread growThread;
+
 	protected JPanel mainPanel = null;
 	protected JPanel optionsPanel = null;
 	protected JLabel title = null;
@@ -33,177 +43,213 @@ public class PlantGrowthApp extends BGApp {
 	protected JButton createRuleBtn = null;
 	protected JLabel ruleLabel = null;
 	protected JLabel genLabel = null;
-	protected JComboBox<String> ruleList = null;
-	protected JComboBox<String> generationList = null;
+	protected JComboBox<String> ruleList;
+	protected JComboBox<String> generationList;
 	protected JButton startBtn = null;
 	protected JButton pauseBtn = null;
 	protected JButton viewRulesBtn = null;
 	private BGCanvas bgPanel = null;
-	
-	private String[] generations;
+	private int startLoc;
+
+	private String[] genNumbers;
+	private ArrayList<String> ruleNames;
+	private String[] rNames ;
 
 	public PlantGrowthApp() {
-		frame.setSize(500, 400); // initial Frame size
+		rules = new ArrayList<BGRule>();
+		ruleNames = new ArrayList<String>();
+		frame.setSize(1000, 1000); // initial Frame size
 		frame.setTitle("Plant Growth App");
-		
-		menuMgr.createDefaultActions(); // Set up default menu items
-		
-    	showUI(); // Cause the Swing Dispatch thread to display the JFrame
-	}
 
-	ArrayList<BGRule> rules = new ArrayList<BGRule>();
-	private BGGenerationSet plants;
+		menuMgr.createDefaultActions(); // Set up default menu items
+
+		showUI(); // Cause the Swing Dispatch thread to display the JFrame
+	}
 
 	public void run() {
 	}
 
-	/*@Override
-	public void startAction() {
-		plants = new BGGenerationSet(new ArrayList<String>(Arrays.asList(textfield.getText().split(","))));
-		plants.createPlants();
-	}
-
-	@Override
-	public void stopAction() {
-		plants.setDone(true);
-	}*/
-
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowActivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowIconified(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void windowOpened(WindowEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public JPanel getMainPanel() {
 		mainPanel = new JPanel();
-    	mainPanel.setLayout(new BorderLayout());
-    	mainPanel.add(BorderLayout.WEST, getOptionsPanel());
-    	
-    	bgPanel = BGCanvas.instance();
-    	mainPanel.add(BorderLayout.CENTER, bgPanel);
-    	
-    	return mainPanel;
+		mainPanel.setLayout(new BorderLayout());
+
+		bgPanel = BGCanvas.instance();
+		startLoc = bgPanel.getSize().width / 2;
+		mainPanel.add(BorderLayout.CENTER, bgPanel);
+
+		mainPanel.add(BorderLayout.WEST, getOptionsPanel());
+
+		return mainPanel;
 	}
-	
+
 	public JPanel getOptionsPanel() {
+		createDefaultRule();
 		optionsPanel = new JPanel();
 		optionsPanel.setBackground(Color.BLACK);
 		DesignGridLayout pLayout = new DesignGridLayout(optionsPanel);
-    	
-    	title = new JLabel("PLANT GROWTH APP");
-    	title.setForeground(Color.WHITE);
-    	
-    	createRuleBtn = new JButton("Create Rule");
-    	createRuleBtn.addActionListener(this);
-    	
-    	viewRulesBtn = new JButton("View Rules");
-    	viewRulesBtn.addActionListener(this);
-    	
-    	ruleLabel = new JLabel("Rule");
-    	ruleLabel.setForeground(Color.WHITE);
-    	
-    	genLabel = new JLabel("Number of Generations");
-    	genLabel.setForeground(Color.WHITE);
-    	
-    	ruleList = new JComboBox<String>();
-    	generations = new String[MAX_GENERATIONS];
-    	for(int i = 0; i < MAX_GENERATIONS ; i ++) {
-    		generations[i] = Integer.toString(i + 1);
-    	}
-    	generationList = new JComboBox<String>(generations);
-    	
-    	startBtn = new JButton("Start");
-    	startBtn.addActionListener(new ActionListener() {
+
+		title = new JLabel("PLANT GROWTH APP");
+		title.setForeground(Color.WHITE);
+
+		createRuleBtn = new JButton("Create Rule");
+		createRuleBtn.addActionListener(this);
+
+		viewRulesBtn = new JButton("View Rules");
+		viewRulesBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ArrayList<String> names = new ArrayList<String>();
-				names.add("Cherry");
-				plants = new BGGenerationSet();
-				plants.createPlants();
+				viewRules();
 			}
 		});
-    	
-    	pauseBtn = new JButton("Pause"); // Allow the app to hear about button pushes
-    	pauseBtn.addActionListener(this);
-    	pauseBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				plants.setDone(true);
-			}
-		});
-    	
-    	resetBtn = new JButton("Reset"); // Allow the app to hear about button pushes
-    	resetBtn.addActionListener(this);
-    	
-    	pLayout.row().center().add(title);
-		for(int i = 0 ; i < 5; i++) {
-			pLayout.row().center().add(new JLabel(""));  // Adding empty rows using empty JLabel
+
+		ruleLabel = new JLabel("Rule");
+		ruleLabel.setForeground(Color.WHITE);
+
+		genLabel = new JLabel("Number of Generations");
+		genLabel.setForeground(Color.WHITE);
+
+		rNames = new String[rules.size()];
+		int j = 0;
+		for(String name : ruleNames) {
+			rNames[j] = name;
+			j++;
 		}
-		
-		pLayout.row().center().add(createRuleBtn,viewRulesBtn);
-		for(int i = 0 ; i < 5; i++) {
+		ruleList = new JComboBox<String>(rNames);
+			
+		genNumbers = new String[MAX_GENERATIONS];
+		for (int i = 0; i < MAX_GENERATIONS; i++) {
+			genNumbers[i] = Integer.toString(i + 1);
+		}
+		generationList = new JComboBox<String>(genNumbers);
+
+		startBtn = new JButton("Start");
+		startBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(growThread != null && growThread.isAlive()) {
+					growThread.resume();
+				}else {
+					generations = new BGGenerationSet(defaultRule, new int[] { 50, 0 });
+					generations.setRunning(true);
+					growThread = new Thread(generations);
+					growThread.start();
+				}
+			}
+		});
+
+		pauseBtn = new JButton("Pause"); // Allow the app to hear about button pushes
+		pauseBtn.addActionListener(this);
+		pauseBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				growThread.suspend();
+			}
+		});
+
+		resetBtn = new JButton("Reset"); // Allow the app to hear about button pushes
+		resetBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				growThread.stop();
+				bgPanel.setReset(true);
+				bgPanel.repaint();
+			}
+		});
+
+		pLayout.row().center().add(title);
+		for (int i = 0; i < 5; i++) {
+			pLayout.row().center().add(new JLabel("")); // Adding empty rows using empty JLabel
+		}
+
+		pLayout.row().center().add(createRuleBtn, viewRulesBtn);
+		for (int i = 0; i < 5; i++) {
 			pLayout.row().center().add(new JLabel(""));
 		}
-		
-		pLayout.row().center().add(ruleLabel,genLabel);
+
+		pLayout.row().center().add(ruleLabel, genLabel);
 		pLayout.row().center().add(ruleList, generationList);
-		for(int i = 0 ; i < 25; i++) {
+		for (int i = 0; i < 25; i++) {
 			pLayout.row().center().add(new JLabel(""));
 		}
-		
+
 		pLayout.row().center().add(startBtn);
 		pLayout.emptyRow();
 		pLayout.row().center().add(pauseBtn);
 		pLayout.emptyRow();
 		pLayout.row().center().add(resetBtn);
 
-    	return optionsPanel;
-    }
-	
+		return optionsPanel;
+	}
+
 	public static void main(String[] args) {
 		PlantGrowthApp pgApp = new PlantGrowthApp();
 		log.info("PlantGrowthApp started");
 	}
 
+	private void createDefaultRule() {
+		HashMap<Double, Double[]> angleLookUp = new HashMap<Double, Double[]>();
+		rules = new ArrayList<BGRule>();
+		ruleNames = new ArrayList<String>();
+		angleLookUp.put(0.0, new Double[] { 45.0 });
+		angleLookUp.put(45.0, new Double[] { 0.0, 45.0, 90.0 });
+		angleLookUp.put(90.0, new Double[] { 45.0, 90.0, 135.0 });
+		angleLookUp.put(135.0, new Double[] { 90.0, 135.0, 180.0 });
+		angleLookUp.put(180.0, new Double[] { 135.0 });
+		defaultRule = new BGRule("Default", angleLookUp);
+		rules.add(defaultRule);
+		ruleNames.add(defaultRule.getName());
+	}
+	
+	private void viewRules() {
+		BGRuleView rv = new BGRuleView();
+		for(String ruleName : ruleNames) {
+			rv.writeText(ruleName);
+		}
+	}
+	
 }
