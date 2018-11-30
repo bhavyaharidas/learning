@@ -32,8 +32,8 @@ public class PlantGrowthApp extends BGApp {
 	private static int MAX_GENERATIONS = 15;
 
 	private BGGenerationSet generations;
-	private BGRule defaultRule;
-	private ArrayList<BGRule> rules;
+	private HashMap<Integer,BGRule> rules;
+	private int ruleCount;
 	private Thread growThread;
 
 	protected JPanel mainPanel = null;
@@ -56,7 +56,6 @@ public class PlantGrowthApp extends BGApp {
 	private String[] rNames ;
 
 	public PlantGrowthApp() {
-		rules = new ArrayList<BGRule>();
 		ruleNames = new ArrayList<String>();
 		frame.setSize(1000, 1000); // initial Frame size
 		frame.setTitle("Plant Growth App");
@@ -176,7 +175,7 @@ public class PlantGrowthApp extends BGApp {
 				if(growThread != null && growThread.isAlive()) {
 					growThread.resume();
 				}else {
-					generations = new BGGenerationSet(defaultRule, new int[] { 50, 0 });
+					generations = new BGGenerationSet(rules.get(ruleList.getSelectedIndex()), new int[] { 50, 0 }, Integer.parseInt((String)generationList.getSelectedItem()));
 					generations.setRunning(true);
 					growThread = new Thread(generations);
 					growThread.start();
@@ -233,17 +232,27 @@ public class PlantGrowthApp extends BGApp {
 	}
 
 	private void createDefaultRule() {
-		HashMap<Double, Double[]> angleLookUp = new HashMap<Double, Double[]>();
-		rules = new ArrayList<BGRule>();
+		rules = new HashMap<Integer,BGRule>();
 		ruleNames = new ArrayList<String>();
-		angleLookUp.put(0.0, new Double[] { 45.0 });
-		angleLookUp.put(45.0, new Double[] { 0.0, 45.0, 90.0 });
-		angleLookUp.put(90.0, new Double[] { 45.0, 90.0, 135.0 });
-		angleLookUp.put(135.0, new Double[] { 90.0, 135.0, 180.0 });
-		angleLookUp.put(180.0, new Double[] { 135.0 });
-		defaultRule = new BGRule("Default", angleLookUp);
-		rules.add(defaultRule);
-		ruleNames.add(defaultRule.getName());
+		HashMap<Double, Double[]> angleLookUp1 = new HashMap<Double, Double[]>();
+		angleLookUp1.put(0.0, new Double[] { 45.0 });
+		angleLookUp1.put(45.0, new Double[] { 0.0, 45.0, 90.0 });
+		angleLookUp1.put(90.0, new Double[] { 45.0, 90.0, 135.0 });
+		angleLookUp1.put(135.0, new Double[] { 90.0, 135.0, 180.0 });
+		angleLookUp1.put(180.0, new Double[] { 135.0 });
+		BGRule rule1 = new BGRule("Rule 1", angleLookUp1);
+		rules.put(ruleCount,rule1);
+		ruleNames.add(rule1.getName());
+		ruleCount++;
+		HashMap<Double, Double[]> angleLookUp2 = new HashMap<Double, Double[]>();
+		angleLookUp2.put(30.0, new Double[] { 60.0, 120.0 });
+		angleLookUp2.put(60.0, new Double[] { 30.0, 90.0, 150.0 });
+		angleLookUp2.put(90.0, new Double[] { 30.0, 150.0 });
+		angleLookUp2.put(120.0, new Double[] { 30.0, 90.0, 150.0 });
+		angleLookUp2.put(150.0, new Double[] { 60.0, 120.0 });
+		BGRule rule2 = new BGRule("Rule 2", angleLookUp2);
+		rules.put(ruleCount,rule2);
+		ruleNames.add(rule2.getName());
 	}
 	
 	private void viewRules() {

@@ -14,10 +14,12 @@ public class BGGenerationSet extends Observable implements Runnable {
 	private boolean done = false;
 	private boolean running = false;
 	private int[] startPoint;
+	private int genLimit;
 
-	public BGGenerationSet(BGRule rule, int[] startPoint) {
+	public BGGenerationSet(BGRule rule, int[] startPoint, int genLimit) {
 		this.rule = rule;
 		this.startPoint = startPoint;
+		this.genLimit = genLimit;
 		generations = new ArrayList<BGGeneration>();
 		observer = BGCanvas.instance();
 		this.addObserver(observer); // make a subscription
@@ -51,7 +53,7 @@ public class BGGenerationSet extends Observable implements Runnable {
 			BGStem stem = new BGStem(startPoint, 5, 90);
 			generation.setFirstGen(stem);
 			generation.addToStemFamily(stem);
-			while (!done) {
+			for(int i = 0; i < genLimit ; i++) {
 				generation.grow();
 				// generation.printGeneration();
 				addGeneration(generation);
