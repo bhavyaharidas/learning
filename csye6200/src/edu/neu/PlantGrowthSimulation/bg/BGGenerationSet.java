@@ -5,12 +5,14 @@ import java.util.Observable;
 import java.util.Timer;
 
 import edu.neu.PlantGrowthSimulation.ui.BGCanvas;
+import edu.neu.PlantGrowthSimulation.ui.BGStatusBar;
 
 public class BGGenerationSet extends Observable implements Runnable {
 
 	private BGRule rule;
 	private static ArrayList<BGGeneration> generations;
-	private BGCanvas observer = null;
+	private BGCanvas canvasObserver = null;
+	private BGStatusBar statusObserver = null;
 	private boolean done = false;
 	private boolean running = false;
 	private int[] startPoint;
@@ -21,8 +23,10 @@ public class BGGenerationSet extends Observable implements Runnable {
 		this.startPoint = startPoint;
 		this.genLimit = genLimit;
 		generations = new ArrayList<BGGeneration>();
-		observer = BGCanvas.instance();
-		this.addObserver(observer); // make a subscription
+		canvasObserver = BGCanvas.instance();
+		statusObserver = BGStatusBar.instance();
+		this.addObserver(canvasObserver); // make a subscription
+		this.addObserver(statusObserver); 
 	}
 
 	public ArrayList<BGGeneration> getGenerations() {

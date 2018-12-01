@@ -2,6 +2,7 @@ package edu.neu.PlantGrowthSimulation.bg;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -23,6 +24,7 @@ import javax.swing.SwingUtilities;
 import edu.neu.PlantGrowthSimulation.ui.BGApp;
 import edu.neu.PlantGrowthSimulation.ui.BGCanvas;
 import edu.neu.PlantGrowthSimulation.ui.BGRuleView;
+import edu.neu.PlantGrowthSimulation.ui.BGStatusBar;
 import edu.neu.PlantGrowthSimulation.ui.MenuManager;
 import net.java.dev.designgridlayout.DesignGridLayout;
 
@@ -38,6 +40,8 @@ public class PlantGrowthApp extends BGApp {
 
 	protected JPanel mainPanel = null;
 	protected JPanel optionsPanel = null;
+	private BGCanvas bgPanel = null;
+	private BGStatusBar statusPanel = null;
 	protected JLabel title = null;
 	protected JButton resetBtn = null;
 	protected JButton createRuleBtn = null;
@@ -48,7 +52,6 @@ public class PlantGrowthApp extends BGApp {
 	protected JButton startBtn = null;
 	protected JButton pauseBtn = null;
 	protected JButton viewRulesBtn = null;
-	private BGCanvas bgPanel = null;
 	private int startLoc;
 
 	private String[] genNumbers;
@@ -57,7 +60,7 @@ public class PlantGrowthApp extends BGApp {
 
 	public PlantGrowthApp() {
 		ruleNames = new ArrayList<String>();
-		frame.setSize(1000, 1000); // initial Frame size
+		frame.setSize(500, 400); // initial Frame size
 		frame.setTitle("Plant Growth App");
 
 		menuMgr.createDefaultActions(); // Set up default menu items
@@ -122,10 +125,13 @@ public class PlantGrowthApp extends BGApp {
 		mainPanel.setLayout(new BorderLayout());
 
 		bgPanel = BGCanvas.instance();
+		statusPanel = BGStatusBar.instance();
+		statusPanel.setPreferredSize(new Dimension(bgPanel.WIDTH, 30));
 		startLoc = bgPanel.getSize().width / 2;
 		mainPanel.add(BorderLayout.CENTER, bgPanel);
 
 		mainPanel.add(BorderLayout.WEST, getOptionsPanel());
+		mainPanel.add(BorderLayout.SOUTH, statusPanel);
 
 		return mainPanel;
 	}
@@ -172,6 +178,7 @@ public class PlantGrowthApp extends BGApp {
 		startBtn = new JButton("Start");
 		startBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				//statusPanel.setTotalGens(Integer.parseInt((String)generationList.getSelectedItem()));
 				if(growThread != null && growThread.isAlive()) {
 					growThread.resume();
 				}else {

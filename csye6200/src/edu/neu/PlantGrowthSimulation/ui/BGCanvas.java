@@ -23,7 +23,6 @@ public class BGCanvas extends JPanel implements Observer {
 
 	private static final long serialVersionUID = 1L;
 	private Logger log = Logger.getLogger(BGCanvas.class.getName());
-	private int lineSize = 20;
 	private Color col = null;
 	private int counter = 0;
 	private String msg = "Hi";
