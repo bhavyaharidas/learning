@@ -17,6 +17,8 @@ public class BGGenerationSet extends Observable implements Runnable {
 	private boolean running = false;
 	private int[] startPoint;
 	private int genLimit;
+	
+	private static int BASE_STEM_LENGTH = 5;
 
 	public BGGenerationSet(BGRule rule, int[] startPoint, int genLimit) {
 		this.rule = rule;
@@ -39,6 +41,12 @@ public class BGGenerationSet extends Observable implements Runnable {
 		setChanged(); // Indicate that a generation has been added
 		notifyObservers(generation);
 	}
+	
+	public void removeGenerations() {
+		generations = null;
+		setChanged();
+		notifyObservers(0);
+	}
 
 	public void setDone(boolean done) {
 		for (BGGeneration generation : generations) {
@@ -54,7 +62,7 @@ public class BGGenerationSet extends Observable implements Runnable {
 	public void run() {
 		if (generations.isEmpty()) {
 			BGGeneration generation = new BGGeneration("Name", rule);
-			BGStem stem = new BGStem(startPoint, 5, 90);
+			BGStem stem = new BGStem(startPoint, BASE_STEM_LENGTH, 90);
 			generation.setFirstGen(stem);
 			generation.addToStemFamily(stem);
 			for(int i = 0; i < genLimit ; i++) {

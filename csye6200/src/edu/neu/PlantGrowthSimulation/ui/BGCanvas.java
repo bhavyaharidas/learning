@@ -86,9 +86,10 @@ public class BGCanvas extends JPanel implements Observer {
 		int endy = 600;
 		paintLine(g2d, startx, starty, endx, endy, Color.GREEN);
 		if (baseStem != null && !reset) {
-			paintLine(g2d, 10 * baseStem.getStartLoc()[0], referenceY - baseStem.getStartLoc()[1], 10 * baseStem.getStartLoc()[0], referenceY - (baseStem.getLength() * 10), Color.GREEN);
-			drawGeneration(baseStem,g2d);
-		} else if(reset) {
+			paintLine(g2d, 10 * baseStem.getStartLoc()[0], referenceY - baseStem.getStartLoc()[1],
+					10 * baseStem.getStartLoc()[0], referenceY - (baseStem.getLength() * 10), Color.GREEN);
+			drawGeneration(baseStem, g2d);
+		} else if (reset) {
 			reset = false;
 			baseStem = null;
 			repaint();
@@ -103,16 +104,18 @@ public class BGCanvas extends JPanel implements Observer {
 	}
 
 	private void drawGeneration(BGStem stem, Graphics2D g2d) {
-		if(stem.hasChildren()) {
+		if (stem.hasChildren()) {
 			for (BGStem child : stem.getChildStem()) {
-				int endx = 10 * child.getStartLoc()[0] + (int) (child.getLength()*10 * Math.cos(Math.toRadians(child.getDirection())));
-				int endy = referenceY - (10 * child.getStartLoc()[1] + (int) (child.getLength()*10 * Math.sin(Math.toRadians(child.getDirection()))));
-				paintLine(g2d, 10 * child.getStartLoc()[0], referenceY - child.getStartLoc()[1] * 10,endx , endy, Color.GREEN);
+				int endx = 10 * child.getStartLoc()[0]
+						+ (int) (child.getLength() * 10 * Math.cos(Math.toRadians(child.getDirection())));
+				int endy = referenceY - (10 * child.getStartLoc()[1]
+						+ (int) (child.getLength() * 10 * Math.sin(Math.toRadians(child.getDirection()))));
+				paintLine(g2d, 10 * child.getStartLoc()[0], referenceY - child.getStartLoc()[1] * 10, endx, endy,
+						Color.GREEN);
 				drawGeneration(child, g2d);
 			}
 		}
 	}
-
 
 	/*
 	 * A local routine to ensure that the color value is in the 0 to 255 range.
@@ -143,10 +146,15 @@ public class BGCanvas extends JPanel implements Observer {
 	@Override
 	public void update(Observable arg0, Object generation) {
 		BGGeneration gen;
-		gen = (BGGeneration) generation;
-		baseStem = gen.getFirstGen();
-		this.revalidate();
-		this.repaint();
+		if (generation instanceof Integer) {
+			reset = true;
+			this.repaint();
+		} else {
+			gen = (BGGeneration) generation;
+			baseStem = gen.getFirstGen();
+			this.revalidate();
+			this.repaint();
+		}
 	}
 
 }

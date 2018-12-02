@@ -1,6 +1,8 @@
 package edu.neu.PlantGrowthSimulation.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -30,7 +32,7 @@ public class BGRuleView implements WindowListener {
 		ruleFrame.addWindowListener(this); 
 		
 		ruleFrame.setLayout(new BorderLayout());
-		ruleFrame.add(getMainPanel(),BorderLayout.NORTH); 
+		ruleFrame.add(getMainPanel(),BorderLayout.CENTER); 
 		ruleFrame.setVisible(true);
 	}
 
@@ -79,8 +81,12 @@ public class BGRuleView implements WindowListener {
 	public JPanel getMainPanel() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
+		mainPanel.setBackground(Color.BLACK);
 		textArea = new JTextArea();
-		mainPanel.add(BorderLayout.SOUTH, textArea);
+		textArea.setPreferredSize(new Dimension(100,100));
+		textArea.setBackground(Color.BLACK);
+		textArea.setForeground(Color.white);
+		mainPanel.add(BorderLayout.CENTER, textArea);
 		return mainPanel;
 	}
 	

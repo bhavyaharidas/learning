@@ -34,7 +34,7 @@ public class PlantGrowthApp extends BGApp {
 	private static int MAX_GENERATIONS = 15;
 
 	private BGGenerationSet generations;
-	private HashMap<Integer,BGRule> rules;
+	private HashMap<Integer, BGRule> rules;
 	private int ruleCount;
 	private Thread growThread;
 
@@ -49,17 +49,16 @@ public class PlantGrowthApp extends BGApp {
 	protected JLabel genLabel = null;
 	protected JComboBox<String> ruleList;
 	protected JComboBox<String> generationList;
-	protected JButton startBtn = null;
+	// protected final JButton startBtn = null;
 	protected JButton pauseBtn = null;
 	protected JButton viewRulesBtn = null;
 	private int startLoc;
 
 	private String[] genNumbers;
 	private ArrayList<String> ruleNames;
-	private String[] rNames ;
+	private String[] rNames;
 
 	public PlantGrowthApp() {
-		ruleNames = new ArrayList<String>();
 		frame.setSize(500, 400); // initial Frame size
 		frame.setTitle("Plant Growth App");
 
@@ -126,7 +125,7 @@ public class PlantGrowthApp extends BGApp {
 
 		bgPanel = BGCanvas.instance();
 		statusPanel = BGStatusBar.instance();
-		statusPanel.setPreferredSize(new Dimension(bgPanel.WIDTH, 30));
+		statusPanel.setPreferredSize(new Dimension(bgPanel.getSize().width, 30));
 		startLoc = bgPanel.getSize().width / 2;
 		mainPanel.add(BorderLayout.CENTER, bgPanel);
 
@@ -163,48 +162,58 @@ public class PlantGrowthApp extends BGApp {
 
 		rNames = new String[rules.size()];
 		int j = 0;
-		for(String name : ruleNames) {
+		for (String name : ruleNames) {
 			rNames[j] = name;
 			j++;
 		}
 		ruleList = new JComboBox<String>(rNames);
-			
+
 		genNumbers = new String[MAX_GENERATIONS];
 		for (int i = 0; i < MAX_GENERATIONS; i++) {
 			genNumbers[i] = Integer.toString(i + 1);
 		}
 		generationList = new JComboBox<String>(genNumbers);
 
-		startBtn = new JButton("Start");
+		final JButton startBtn = new JButton("Start");
+		startBtn.setEnabled(true);
 		startBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//statusPanel.setTotalGens(Integer.parseInt((String)generationList.getSelectedItem()));
-				if(growThread != null && growThread.isAlive()) {
+				if (growThread != null && growThread.isAlive()) {
 					growThread.resume();
-				}else {
-					generations = new BGGenerationSet(rules.get(ruleList.getSelectedIndex()), new int[] { 50, 0 }, Integer.parseInt((String)generationList.getSelectedItem()));
+				} else {
+					generations = new BGGenerationSet(rules.get(ruleList.getSelectedIndex()), new int[] { 50, 0 },
+							Integer.parseInt((String) generationList.getSelectedItem()));
 					generations.setRunning(true);
 					growThread = new Thread(generations);
 					growThread.start();
 				}
+				JButton source = (JButton) arg0.getSource();
+				source.setText("Start");
+				source.setEnabled(false);
 			}
 		});
 
 		pauseBtn = new JButton("Pause"); // Allow the app to hear about button pushes
-		pauseBtn.addActionListener(this);
+		// pauseBtn.setEnabled(false);
 		pauseBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				growThread.suspend();
+				if (growThread != null) {
+					growThread.suspend();
+					startBtn.setText("Resume");
+					startBtn.setEnabled(true);
+				}
 			}
 		});
 
 		resetBtn = new JButton("Reset"); // Allow the app to hear about button pushes
 		resetBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				generations.setDone(true);
-				growThread.stop();
-				//bgPanel.setReset(true);
-				//bgPanel.repaint();
+				if (growThread != null) {
+					growThread.stop();
+					growThread = null;
+					generations.removeGenerations();
+					startBtn.setEnabled(true);
+				}
 			}
 		});
 
@@ -239,34 +248,36 @@ public class PlantGrowthApp extends BGApp {
 	}
 
 	private void createDefaultRule() {
-		rules = new HashMap<Integer,BGRule>();
+		rules = new HashMap<Integer, BGRule>();
 		ruleNames = new ArrayList<String>();
 		HashMap<Double, Double[]> angleLookUp1 = new HashMap<Double, Double[]>();
+		int lengthFactor1 = 10;
 		angleLookUp1.put(0.0, new Double[] { 45.0 });
 		angleLookUp1.put(45.0, new Double[] { 0.0, 45.0, 90.0 });
 		angleLookUp1.put(90.0, new Double[] { 45.0, 90.0, 135.0 });
 		angleLookUp1.put(135.0, new Double[] { 90.0, 135.0, 180.0 });
 		angleLookUp1.put(180.0, new Double[] { 135.0 });
-		BGRule rule1 = new BGRule("Rule 1", angleLookUp1);
-		rules.put(ruleCount,rule1);
+		BGRule rule1 = new BGRule("Rule 1", angleLookUp1, lengthFactor1);
+		rules.put(ruleCount, rule1);
 		ruleNames.add(rule1.getName());
 		ruleCount++;
 		HashMap<Double, Double[]> angleLookUp2 = new HashMap<Double, Double[]>();
+		int lengthFactor2 = 10;
 		angleLookUp2.put(30.0, new Double[] { 60.0, 120.0 });
 		angleLookUp2.put(60.0, new Double[] { 30.0, 90.0, 150.0 });
-		angleLookUp2.put(90.0, new Double[] { 30.0, 150.0 });
+		angleLookUp2.put(90.0, new Double[] { 30.0, 90.0, 150.0 });
 		angleLookUp2.put(120.0, new Double[] { 30.0, 90.0, 150.0 });
 		angleLookUp2.put(150.0, new Double[] { 60.0, 120.0 });
-		BGRule rule2 = new BGRule("Rule 2", angleLookUp2);
-		rules.put(ruleCount,rule2);
+		BGRule rule2 = new BGRule("Rule 2", angleLookUp2, lengthFactor2);
+		rules.put(ruleCount, rule2);
 		ruleNames.add(rule2.getName());
 	}
-	
+
 	private void viewRules() {
 		BGRuleView rv = new BGRuleView();
-		for(String ruleName : ruleNames) {
-			rv.writeText(ruleName);
+		for (BGRule rule : rules.values()) {
+			rv.writeText(rule.toString()+ "\n\n" );
 		}
 	}
-	
+
 }

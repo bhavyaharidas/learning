@@ -9,6 +9,8 @@ import java.util.Observer;
 
 import javax.swing.JPanel;
 
+import edu.neu.PlantGrowthSimulation.bg.BGGeneration;
+
 public class BGStatusBar extends JPanel implements Observer{
 
 	private static final long serialVersionUID = 1L;
@@ -34,6 +36,9 @@ public class BGStatusBar extends JPanel implements Observer{
 	public void setTotalGens(int totalGens) {
 		this.totalGens = totalGens;
 	}
+	public void resetWidthCounter() {
+		this.widthCounter = 0;
+	}
 
 	public void drawBG(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
@@ -46,7 +51,11 @@ public class BGStatusBar extends JPanel implements Observer{
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		widthCounter++;
+		if (arg1 instanceof Integer) {
+			widthCounter = 0;
+		} else {
+			widthCounter++;
+		}
 		this.repaint();
 	}
 

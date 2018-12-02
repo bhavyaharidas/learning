@@ -86,7 +86,7 @@ public class BGGeneration {
 		int y = stem.getStartLoc()[1] + (int) (stem.getLength() * Math.sin(Math.toRadians(stem.getDirection())));
 		int[] newStartLoc = new int[] { x, y }; // New start location
 
-		int length = rule.lengthLookup(totalLength, totalWidth); // New length
+		int length = rule.lengthLookup(totalLength, totalWidth, stem.getLength()); // New length
 		Double[] angles = rule.getAngleLookUp().get(stem.getDirection()); // New set of angles
 
 		for (double angle : angles) {
