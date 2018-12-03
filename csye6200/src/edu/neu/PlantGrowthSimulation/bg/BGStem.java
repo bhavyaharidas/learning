@@ -13,15 +13,21 @@ import java.util.List;
 
 public class BGStem {
 
-	private static int idCount;
+	private static int idCount; // Counter that sets id
 
 	private int id;
-	private int[] startLoc;
-	private int length;
-	private double direction;
+	private int[] startLoc; // Starting coordinates of stem
+	private int length; // Length of stem
+	private double direction; //angle
 
-	private ArrayList<BGStem> childStem;
+	private ArrayList<BGStem> childStem; //list of immediate list of child stems
 
+	/**
+	 * @param startLoc  - passes starting location of the stem
+	 * @param length    - passes length of stem
+	 * @param direction - passes the angle in degree in which the stem is to be
+	 *                  grown.
+	 */
 	public BGStem(int[] startLoc, int length, double direction) {
 		idCount++;
 		this.id = idCount;
@@ -34,42 +40,34 @@ public class BGStem {
 
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
+	/**
+	 * @return array denoting start location of stem
+	 */
 	public int[] getStartLoc() {
 		return startLoc;
 	}
 
-	public void setStartLoc(int[] startLoc) {
-		this.startLoc = startLoc;
-	}
-
+	/**
+	 * @return Length of stem
+	 */
 	public int getLength() {
 		return length;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
 	}
 
 	public double getDirection() {
 		return direction;
 	}
 
-	public void setDirection(double direction) {
-		this.direction = direction;
-	}
-
+	/**
+	 * @return - list of immediate child stems of the stem
+	 */
 	public List<BGStem> getChildStem() {
 		return childStem;
 	}
 
+	/**
+	 * @param adds childStem to the list of childstems
+	 */
 	public void addChildStem(BGStem childStem) {
 		if (this.childStem == null) {
 			this.childStem = new ArrayList<BGStem>();
@@ -77,22 +75,9 @@ public class BGStem {
 		this.childStem.add(childStem);
 	}
 
-	public void removeChild(BGStem childStem) {
-		this.childStem.remove(childStem.id);
-	}
-
-	public int getChildCount() {
-		int count = 1;
-		if (!this.hasChildren()) {
-			return 1;
-		} else {
-			for (BGStem child : this.childStem) {
-				count += child.getChildCount();
-			}
-		}
-		return count;
-	}
-
+	/**
+	 * @return a boolean indicating if the stem is an end point
+	 */
 	public Boolean hasChildren() {
 		return this.childStem != null;
 	}

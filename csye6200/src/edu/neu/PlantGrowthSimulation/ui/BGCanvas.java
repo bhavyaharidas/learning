@@ -17,7 +17,7 @@ import edu.neu.csye6200.inherit.MeterManager;
 /**
  * A sample canvas that draws a rainbow of lines
  * 
- * @author MMUNSON
+ * @author bhavya
  */
 public class BGCanvas extends JPanel implements Observer {
 
@@ -60,97 +60,90 @@ public class BGCanvas extends JPanel implements Observer {
 	 * @param g
 	 */
 	public void drawBG(Graphics g) {
-		log.info("Drawing BG " + counter++);
+		log.info("Drawing Canvas " + counter++);
 		Graphics2D g2d = (Graphics2D) g;
 		Dimension size = getSize();
 
-		g2d.setColor(Color.BLACK);
+		g2d.setColor(Color.BLACK); // set background to black
 		g2d.fillRect(0, 0, size.width, size.height);
 
 		referenceX = size.width / 2;
-		referenceY = 600;
+		referenceY = 600; // defining ground level
 
-		g2d.setColor(Color.RED);
-		g2d.drawString(msg, 10, 15);
+		g2d.setColor(Color.DARK_GRAY);
+		g2d.fillRect(0, referenceY, size.width, size.height);
 
-		/*
-		 * int maxRows = size.height / lineSize; int maxCols = size.width / lineSize;
-		 * for (int j = 0; j < maxRows; j++) { for (int i = 0; i < maxCols; i++) { int
-		 * redVal = validColor(i*5); int greenVal = validColor(255-j*5); int blueVal =
-		 * validColor((j*5)-(i*2)); col = new Color(redVal, greenVal, blueVal);
-		 */
-		// Draw box, one pixel less to create a black outline
-		int startx = 0;
-		int starty = 600;
-		int endx = size.width;
-		int endy = 600;
-		paintLine(g2d, startx, starty, endx, endy, Color.GREEN);
 		if (baseStem != null && !reset) {
 			paintLine(g2d, 10 * baseStem.getStartLoc()[0], referenceY - baseStem.getStartLoc()[1],
 					10 * baseStem.getStartLoc()[0], referenceY - (baseStem.getLength() * 10), Color.GREEN);
 			drawGeneration(baseStem, g2d);
-		} else if (reset) {
+		} else if (reset) { // reset button set to true upon pressing button
 			reset = false;
 			baseStem = null;
 			repaint();
 		}
-		/*
-		 * } }
-		 */
 	}
 
+	/**
+	 * @param reset - sets the reset boolean
+	 */
 	public void setReset(boolean reset) {
 		this.reset = reset;
 	}
 
+	/**
+	 * Convenience method that paints a stem. Recursively traverses through each
+	 * stem till it reaches an end.
+	 * 
+	 * @param stem - stem to be painted
+	 * @param g2d  - graphics object
+	 */
 	private void drawGeneration(BGStem stem, Graphics2D g2d) {
 		if (stem.hasChildren()) {
 			for (BGStem child : stem.getChildStem()) {
+				// calculating x coord to plot on canvas by multiplying each parameter with 10
 				int endx = 10 * child.getStartLoc()[0]
 						+ (int) (child.getLength() * 10 * Math.cos(Math.toRadians(child.getDirection())));
+				// calculating y coord to plot on canvas by multiplying each parameter with 10
+				// and subtracting it from ground level.
 				int endy = referenceY - (10 * child.getStartLoc()[1]
 						+ (int) (child.getLength() * 10 * Math.sin(Math.toRadians(child.getDirection()))));
 				paintLine(g2d, 10 * child.getStartLoc()[0], referenceY - child.getStartLoc()[1] * 10, endx, endy,
 						Color.GREEN);
-				drawGeneration(child, g2d);
+				drawGeneration(child, g2d); // since it has children, repeatt the same process again.
 			}
 		}
 	}
 
-	/*
-	 * A local routine to ensure that the color value is in the 0 to 255 range.
-	 */
-	private int validColor(int colorVal) {
-		if (colorVal > 255)
-			colorVal = 255;
-		if (colorVal < 0)
-			colorVal = 0;
-		return colorVal;
-	}
-
 	/**
-	 * A convenience routine to set the color and draw a line
+	 * Paints a line in specified color from the start to end point
 	 * 
-	 * @param g2d    the 2D Graphics context
-	 * @param startx the line start position on the x-Axis
-	 * @param starty the line start position on the y-Axis
-	 * @param endx   the line end position on the x-Axis
-	 * @param endy   the line end position on the y-Axis
-	 * @param color  the line color
+	 * @param g2d
+	 * @param startx
+	 * @param starty
+	 * @param endx
+	 * @param endy
+	 * @param color
 	 */
 	private void paintLine(Graphics2D g2d, int startx, int starty, int endx, int endy, Color color) {
 		g2d.setColor(color);
 		g2d.drawLine(startx, starty, endx, endy);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 * Invoked upon notification from observable class BGGeneration
+	 */
 	@Override
 	public void update(Observable arg0, Object generation) {
 		BGGeneration gen;
-		if (generation instanceof Integer) {
+		if (generation instanceof Integer) { //The object passes will be integer 0 upon button click event of Reset
 			reset = true;
 			this.repaint();
 		} else {
-			gen = (BGGeneration) generation;
+			gen = (BGGeneration) generation; // Cast the object to BGGeneration
 			baseStem = gen.getFirstGen();
 			this.revalidate();
 			this.repaint();
